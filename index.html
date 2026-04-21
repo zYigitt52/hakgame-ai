@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HakGame AI</title>
+    <style>
+        body { font-family: sans-serif; background-color: #0f0f0f; color: #e0e0e0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1a1a1a; padding: 2rem; border-radius: 12px; width: 100%; max-width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: 1px solid #333; background: #252525; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 6px; background: #4CAF50; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #45a049; }
+        #chat-ui { display: none; }
+        #box { height: 300px; overflow-y: auto; background: #252525; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #333; }
+        .msg { margin-bottom: 8px; padding: 8px; border-radius: 4px; font-size: 14px; }
+        .u { background: #34495e; text-align: right; }
+        .a { background: #4CAF50; color: #000; }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="login-ui">
+        <h2 style="text-align:center; color:#4CAF50;">HAKGAME LOGIN</h2>
+        <input type="text" id="user" placeholder="Kullanıcı">
+        <input type="password" id="pass" placeholder="Şifre">
+        <button onclick="giris()">Giriş Yap</button>
+    </div>
+
+    <div class="card" id="chat-ui">
+        <h2 style="text-align:center; color:#4CAF50;">HAKGAME AI</h2>
+        <div id="box"></div>
+        <input type="text" id="msgIn" placeholder="Mesaj yaz..." onkeypress="if(event.key==='Enter') gonder()">
+        <button onclick="gonder()">Gönder</button>
+    </div>
+
+    <script>
+        const URL = "RENDER_LINKIN_BURAYA"; 
+
+        async function giris() {
+            const u = document.getElementById("user").value;
+            const p = document.getElementById("pass").value;
+            const r = await fetch(`${URL}/login`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({username: u, password: p})
+            });
+            if(r.ok) {
+                document.getElementById("login-ui").style.display="none";
+                document.getElementById("chat-ui").style.display="block";
+            } else {
+                alert("Hatalı!");
+            }
+        }
+
+        async function gonder() {
+            const i = document.getElementById("msgIn");
+            const m = i.value.trim();
+            if(!m) return;
+            const b = document.getElementById("box");
+            b.innerHTML += `<div class="msg u">${m}</div>`;
+            i.value = "";
+            b.scrollTop = b.scrollHeight;
+
+            const r = await fetch(`${URL}/chat`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({message: m})
+            });
+            const d = await r.json();
+            b.innerHTML += `<div class="msg a">${d.reply}</div>`;
+            b.scrollTop = b.scrollHeight;
+        }
+    </script>
+</body>
+</html>
